@@ -1,5 +1,6 @@
 import React from 'react';
 import { Text, View } from 'react-native';
+import Home from './screens/Home';
 import Temp from './screens/Temp';
 
 export default () => {
@@ -8,6 +9,7 @@ export default () => {
         // <View>
         //     <Text>Welcome Screen</Text>
         // </View>
-        <Temp />
+        // <Temp />
+        <Home />
     );
 };
