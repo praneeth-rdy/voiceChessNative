@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import Voice from '@react-native-community/voice';
 
-import { Chess } from 'chess.js';
+import Chessboard, { ChessboardRef } from 'react-native-chessboard';
 
 // King
 // Queen
@@ -21,14 +21,13 @@ const checkIfVarExistInSpeech = (varList, speech) => {
   return false;
 }
 
-const chess = new Chess();
-
 
 function Home({ props }) {
 
-  const [fen, setFen] = useState('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
   const [result, setResult] = useState('');
   const [isLoading, setLoading] = useState(false);
+
+  const chessboardRef = useRef(null);
 
   let speech;
 
@@ -77,7 +76,7 @@ function Home({ props }) {
     }
   };
 
-  useEffect(() => {    
+  useEffect(() => {
     Voice.onSpeechStart = speechStartHandler;
     Voice.onSpeechEnd = speechEndHandler;
     Voice.onSpeechResults = speechResultsHandler;
@@ -100,42 +99,33 @@ function Home({ props }) {
       speech = result.toLowerCase();
       if (checkIfVarExistInSpeech(['stop', 'end', 'close'], speech)) {
         // stop here
+        Voice.stop();
       } else if (checkIfVarExistInSpeech(['move'], speech)) {
-        // move pawn from d4 to e5
-        let piece;
-        if (checkIfVarExistInSpeech(['pawn', 'on'], speech)) {
-          piece = 'p';
-        } else if (checkIfVarExistInSpeech(['knight', 'night', 'nite'], speech)) {
-          piece = 'n';
-        } else if (checkIfVarExistInSpeech(['rook'], speech)) {
-          piece = 'r';
-        } else if (checkIfVarExistInSpeech(['bishop'], speech)) {
-          piece = 'b';
-        } else if (checkIfVarExistInSpeech(['queen'], speech)) {
-          piece = 'q';
-        } else if (checkIfVarExistInSpeech(['king'], speech)) {
-          piece = 'k';
-        } else {
-          startRecording();
-          return
-        }
+        // move pawn from e2 to e4
         speech = speech.split(' ');
-        let moveVal = piece + speech[3] + speech[5];
 
         try {
-          chess.move(moveVal);
+          chessboardRef.current?.move({ from: speech[3], to: speech[5] });
         } catch (error) {
           console.log("There's some error. Please try again.");
         }
-        console.log(chess.fen());
       }
       startRecording();
     }
   }, [result]);
 
   return (
-    <View>
-
+    <View
+      style={{
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}
+    >
+      <Chessboard
+        ref={chessboardRef}
+        durations={{ move: 500 }}
+      />
     </View>
   );
 }
